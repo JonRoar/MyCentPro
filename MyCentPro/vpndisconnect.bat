@@ -1,0 +1,1 @@
+rasdial "CentPro Drift" /disconnect
