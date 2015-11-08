@@ -10,6 +10,23 @@ namespace MyCentPro
     // You can add User data for the user by adding more properties to your User class, please visit http://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
     public class ApplicationUser : IdentityUser
     {
+        
+    }
+
+    public class UserInfo
+    {
+        public enum Role
+        {
+            User,
+            Superuser,
+            Administrator
+        };
+
+        public string AspID { get; set; }
+        public string Name { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
+        public Role Userlevel { get; set; }
     }
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
@@ -41,8 +58,10 @@ namespace MyCentPro
         {
             IAuthenticationManager authenticationManager = HttpContext.Current.GetOwinContext().Authentication;
             authenticationManager.SignOut(DefaultAuthenticationTypes.ExternalCookie);
+
             var identity = manager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
-            authenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = isPersistent }, identity);
+            //manager.IsInRole(user, "Admin"); Check if user is admin...
+            authenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = isPersistent }, identity);            
         }
 
         public const string ProviderNameKey = "providerName";

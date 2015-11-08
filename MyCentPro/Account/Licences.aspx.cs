@@ -21,6 +21,7 @@ namespace MyCentPro
         DataSet ds = new DataSet();
         SqlCommand cmd = new SqlCommand();
         SqlConnection con;
+        protected global::MyCentPro.UserInfo userInfo;
         //protected global::System.Web.UI.WebControls.GridView licenceGridView;
 
         protected void Page_Load(object sender, EventArgs e)
@@ -53,7 +54,7 @@ namespace MyCentPro
             try
             {
                 SqlConnection con = OpenDBConnection();
-                cmd.CommandText = "SELECT l.lID AS 'lID', u.uName AS 'Eier', a.aAgreementName AS 'Avtale', l.lDateFrom AS 'Gyldig fra', " +
+                /*cmd.CommandText = "SELECT l.lID AS 'lID', u.uName AS 'Eier', a.aAgreementName AS 'Avtale', l.lDateFrom AS 'Gyldig fra', " +
                                     "l.lDateTo AS 'Gyldig til', l.lCount AS 'Antall lisenser', n.nDescription AS 'Varsel', p.pName as 'Produsent', " +
                                     "c.cName AS 'Kontaktperson' " +
 
@@ -62,14 +63,26 @@ namespace MyCentPro
                                     "LEFT JOIN Licences lic ON lic.aID = a.aID " +
                                     "LEFT JOIN Notifications n ON lic.nID = n.nID " +
                                     "LEFT JOIN Producer p ON lic.pID = p.pID " +
-                                    "LEFT JOIN Contacts c ON lic.cID = c.cID";
+                                    "LEFT JOIN Contacts c ON lic.cID = c.cID " +
+                                    "WHERE u.Uname = '" + Application["aspID"] + "'";*/
+
+                cmd.CommandText =   "SELECT l.owner_uID, u.aspID, p.Name as 'Produsent', t.TypeName as 'Lisenstype', l.Qty as 'Antall', " +
+                                    "l.DateFrom as 'Gyldig fra', l.DateTo as 'Gyldig til', u.Name as 'Eier', a.aID as 'AvtaleID', a.AgreementName as 'Avtale', c.cID, c.Name as 'Kontaktperson' " +
+                                    "FROM Licenses l " +
+                                    "JOIN Types t ON l.tID = t.tID " +
+                                    "JOIN Producer p ON l.pID = p.pID " +
+                                    "JOIN Users u ON l.owner_uID = u.uID " +
+                                    "JOIN Contacts c ON l.cID = c.cID " +
+                                    "JOIN Agreements a ON l.aID = a.aID";
+                                    /*WHERE u.aspID = '3db8543c-c0d2-49ff-b7a2-6d794a7358ba'*/ /* Jon Roar Odden */
+                                    /*WHERE u.aspID = 'f84e76b3-aada-4a50-96c0-79a092173491'*/ /* Thomas Rofstad */
                 cmd.Connection = con;
 
                 da = new SqlDataAdapter(cmd);
                 da.Fill(ds);
                 con.Open();
                 cmd.ExecuteNonQuery();
-                Session["LicenceTable"] = ds;
+                Session["LicenseTable"] = ds;
 
                 licenceGridView.DataSource = ds;
                 licenceGridView.DataBind();
@@ -109,7 +122,7 @@ namespace MyCentPro
 
                 //To Export all pages
                 licenceGridView.AllowPaging = false;
-                this.BindData();
+                BindData();
 
                 licenceGridView.HeaderRow.BackColor = Color.White;
                 foreach (TableCell cell in licenceGridView.HeaderRow.Cells)
@@ -205,8 +218,6 @@ namespace MyCentPro
             licenceGridView.EditIndex = -1;
             BindData();
         }
-
-        
 
         protected void licenceGridView_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {

@@ -54,7 +54,7 @@
         <p>
             <asp:GridView ID="licenceGridView" runat="server" AllowPaging="true" AutoGenerateColumns="false" CellPadding="4" GridLines="None"
                 Caption="" CaptionAlign="Left" Width="1200px"
-                DataKeyNames="lID"
+                DataKeyNames="owner_uID"
                 OnPageIndexChanging="licenceGridView_PageIndexChanging"
                 OnRowCancelingEdit="licenceGridView_RowCancelingEdit"
                 OnRowDeleting="licenceGridView_RowDeleting"
@@ -64,15 +64,24 @@
                 AlternatingRowStyle-BackColor="#a6c8e6">
 
                 <Columns>
-                <asp:BoundField DataField="lID" HeaderText="lID" />
-                <asp:BoundField DataField="Eier" HeaderText="Eier" />
-                <asp:BoundField DataField="Avtale" HeaderText="Avtale" />
+                <asp:BoundField DataField="owner_uID" HeaderText="ID" />
+                <asp:BoundField DataField="aspID" HeaderText="aspID" />
+                <asp:BoundField DataField="Produsent" HeaderText="Produsent" />
+                <asp:BoundField DataField="Lisenstype" HeaderText="Lisenstype" />
+                <asp:BoundField DataField="Antall" HeaderText="Antall" />
                 <asp:BoundField DataField="Gyldig fra" HeaderText="Gyldig fra" />
                 <asp:BoundField DataField="Gyldig til" HeaderText="Gyldig til" />
-                <asp:BoundField DataField="Antall lisenser" HeaderText="Antall" />
-                <asp:BoundField DataField="Varsel" HeaderText="Varsel" />
-                <asp:BoundField DataField="Produsent" HeaderText="Produsent" />
-                <asp:BoundField DataField="Kontaktperson" HeaderText="Kontaktperson" />
+                <asp:BoundField DataField="Eier" HeaderText="Eier" />
+                <asp:HyperLinkField 
+                    HeaderText="Avtale"
+                    DataNavigateUrlFields="AvtaleID" 
+                    DataTextField="Avtale"
+                    DataNavigateUrlFormatString="/Accounts/Agreements.aspx?id={0}" />              
+                <asp:HyperLinkField
+                    HeaderText="Kontaktperson" 
+                    DataNavigateUrlFields="cID"
+                    DataTextField="Kontaktperson"
+                    DataNavigateUrlFormatString="/Accounts/Contacts.aspx?id={0}" />
                 <asp:CommandField ShowEditButton="true" />
                 <asp:CommandField ShowDeleteButton="true" />
                 </Columns>
