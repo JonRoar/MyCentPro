@@ -7,11 +7,11 @@ using MyCentPro;
 
 public partial class Account_Login : Page
 {
-    //global::MyCentPro.UserInfo userInfo;
 
+    //global::MyCentPro.UserInfo userInfo;
     protected void Page_Load(object sender, EventArgs e)
     {
-        RegisterHyperLink.NavigateUrl = "Registrer";
+        RegisterHyperLink.NavigateUrl = "Register";
         OpenAuthLogin.ReturnUrl = Request.QueryString["ReturnUrl"];
         var returnUrl = HttpUtility.UrlEncode(Request.QueryString["ReturnUrl"]);
         if (!String.IsNullOrEmpty(returnUrl))
@@ -20,17 +20,18 @@ public partial class Account_Login : Page
         }
     }
 
-    protected void LogIn(object sender, EventArgs e)
+protected void LogIn(object sender, EventArgs e)
+{
+
+    if (IsValid)
     {
-        if (IsValid)
+        var manager = new UserManager();
+        ApplicationUser user = manager.Find(UserName.Text, Password.Text);
+
+        if (user != null)
         {
-            // Validate the user password
-            var manager = new UserManager();
-            ApplicationUser user = manager.Find(UserName.Text, Password.Text);
-            if (user != null)
-            {
-                IdentityHelper.SignIn(manager, user, RememberMe.Checked);
-                //populate a new UserInfo object to use in the application... JRO
+                IdentityHelper.SignIn(manager, user, RememberMe.Checked); //moved from within try
+                //populate a new UserInfo object to use in the application... -jr
                 UserInfo u = new UserInfo();
                 u.AspID = user.Id;
                 u.Name = user.UserName;
@@ -39,11 +40,14 @@ public partial class Account_Login : Page
 
                 IdentityHelper.RedirectToReturnUrl(Request.QueryString["ReturnUrl"], Response);
             }
-            else
-            {
-                FailureText.Text = "Ugyldig brukernavn eller passord.";
-                ErrorMessage.Visible = true;
-            }
+
+        }
+        else
+        {
+            //the line below generates pop-up with error. -jr
+            //this.Page.ClientScript.RegisterStartupScript(this.GetType(), "ex", "alert('Feil brukernavn eller passord.');", true);
+            FailureText.Text = "Ugyldig brukernavn eller passord.";
+            ErrorMessage.Visible = true;
         }
     }
 }

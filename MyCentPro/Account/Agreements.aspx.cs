@@ -37,9 +37,13 @@ namespace MyCentPro
             {
                 con = new SqlConnection(ConfigurationManager.ConnectionStrings["CentProSQL"].ConnectionString);
                 //cmd.CommandText = "Select * from Agreements";
-                cmd.CommandText = "SELECT a.aID AS 'aID', a.aAgreementName AS 'Avtale', u.uName AS 'Avtaleeier'" +
-                                    "FROM Users u, Agreements a " +
-                                    "JOIN Users us ON a.uID_AgreementOwner = us.uID";
+                cmd.CommandText = "SELECT a.aNumber as 'Avtalenummer', p.Name as 'Produsent', a.AgreementName as 'Avtale', a.DateFrom as 'Kjøpt dato', " +
+	                                "a.DateTo as 'Utløpsdato', n.nID, n.nDescription as 'Varsel', u.Name as 'Eier', c.cID, c.Name as 'Kontaktperson' " +
+                                    "FROM Agreements a " +
+                                    "JOIN Users u ON a.uID_AgreementOwner = u.uID " +
+                                    "JOIN Producer p ON a.pID = p.pID " +
+                                    "JOIN Notifications n ON a.nID = n.nID " +
+                                    "JOIN Contacts c ON a.cID = c.cID";
                 cmd.Connection = con;
 
                 da = new SqlDataAdapter(cmd);

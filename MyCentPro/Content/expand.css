@@ -1,5 +1,5 @@
 ﻿
-#eUl, #errUl { list-style-type: none; }
+ul, #eUl, #errUl { list-style-type: none; }
 #eLabel {
 	background-color: #AAAFAB;
 	border-radius: 5px;
@@ -13,6 +13,18 @@
     cursor: pointer; 
     text-align:right;
     float:right;
+}
+
+#dueLabel {
+	background-color: #F0E1A1;
+    color: #ffffff;
+    border-color: #357ebd;
+}
+
+#overDueLabel {
+	background-color: #F0A1BB;
+    color: #ffffff;
+    border-color: #357ebd;
 }
 
 #errLabel {

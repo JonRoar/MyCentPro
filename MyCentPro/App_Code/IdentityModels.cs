@@ -12,7 +12,7 @@ namespace MyCentPro
     {
         
     }
-
+        
     public class UserInfo
     {
         public enum Role
@@ -84,7 +84,9 @@ namespace MyCentPro
         {
             if (!String.IsNullOrEmpty(returnUrl) && IsLocalUrl(returnUrl))
             {
-                response.Redirect(returnUrl);
+                //adding ,false based on http://blogs.msdn.com/b/tmarq/archive/2009/06/25/correct-use-of-system-web-httpresponse-redirect.aspx 
+                //fixed the error on Exception thrown: 'System.Threading.ThreadAbortException' in mscorlib.dll 
+                response.Redirect(returnUrl, false);
             }
             else
             {

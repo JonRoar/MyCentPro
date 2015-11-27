@@ -5,50 +5,56 @@
     <div class="jumbotron">
         <h1>Velkommen til MyCentPro</h1>
         <p class="lead">MyCentPro gir deg fullstendig oversikt over alle firmaets lisenser samtidig som vi sender varsler når abonnementene og avtalene er i ferd med å utløpe.</p>
-        <p><a href="http://www.asp.net" class="btn btn-primary btn-lg">Les mer &raquo;</a> </p>
+        <p><a href="http://www.asp.net" class="btn btn-primary btn-lg">Les mer &raquo;</a>
+        </p>
     </div>
-        <ul id="errUl">
-             <li id="errLi">
-                 <span style="font-weight:bold;">Dette er en feilmelding [hardcoded]</span>
-                 <input type="checkbox" id="errCB"/><label id="errLabel" for="errCB">&nbsp;&nbsp;</label>&nbsp;&nbsp;
-                 
-		        <ul>
-				    <br /><br />Og her kan man få ennå mer informasjon om feilen... <a href="/" >Feil X</a>
-                    
-		        </ul>
-	        </li>
-        </ul>
+    <!--------------------------------------------------------------------->
+    <!-- Placeholder for error messages generated in the code            -->
+    <!--------------------------------------------------------------------->
+    <asp:PlaceHolder runat="server" ID="ErrorMessage" Visible="false">
+        <p class="text-danger">
+            <asp:Literal runat="server" ID="FailureText" />
+        </p>
+    </asp:PlaceHolder>
 
-        <ul id="eUl">
-             <li id="eLi">
-                 <span>Du (Jon Roar Odden) har <span style="color:#ff0000; font-weight:bold;">7</span> lisenser som utgår de nærmeste 3 månedene. [hardcoded]</span>
-                 <input type="checkbox" id="expandCB"/><label id="eLabel" for="expandCB">&nbsp;&nbsp;</label>&nbsp;&nbsp;
+    <!--------------------------------------------------------------------->
+    <!-- Critical error dialogue placeholder for really important stuff. -->
+    <!--------------------------------------------------------------------->
+    <ul id="errUl" runat="server">
+        <li id="errLi">
+            <span style="font-weight:bold;">Dette er en feilmelding [hardcoded]</span>
+            <input type="checkbox" id="errCB"/><label id="errLabel" for="errCB">&nbsp;&nbsp;</label>&nbsp;&nbsp; 
+		    <ul>
+				<div><br /><br />Og her kan man få ennå mer informasjon om feilen... <a href="/" >Feil X</a></div>
+		    </ul>
+	    </li>
+    </ul>
 
-		        <ul>
-				    Her vil alle varsler for dine lisenser og avtaler komme... med linker til hver enkelt av de. <a href="/" >Avtale xyz</a>
-		        </ul>
-                <ul>
-				    Her vil alle varsler for dine lisenser og avtaler komme... med linker til hver enkelt av de. <a href="/" >Avtale xyz</a>
-		        </ul>
-                 <ul>
-				    Her vil alle varsler for dine lisenser og avtaler komme... med linker til hver enkelt av de. <a href="/" >Avtale xyz</a>
-		        </ul>
-                 <ul>
-				    Her vil alle varsler for dine lisenser og avtaler komme... med linker til hver enkelt av de. <a href="/" >Avtale xyz</a>
-		        </ul>
-                 <ul>
-				    Her vil alle varsler for dine lisenser og avtaler komme... med linker til hver enkelt av de. <a href="/" >Avtale xyz</a>
-		        </ul>
-                 <ul>
-				    Her vil alle varsler for dine lisenser og avtaler komme... med linker til hver enkelt av de. <a href="/" >Avtale xyz</a>
-		        </ul>
-                 <ul>
-				    Her vil alle varsler for dine lisenser og avtaler komme... med linker til hver enkelt av de. <a href="/" >Avtale xyz</a>
-		        </ul>
-	        </li>
-        </ul>
+    <!--------------------------------------------------------------------->
+    <!-- Warningbox with dynamic info on licenses and agreement          -->
+    <!-- that expires in the near future according to user settings.     -->
+    <!--------------------------------------------------------------------->
+    <ul id="eUl" runat="server">
+        <li id="eLi">
+            <span>Du (<span id="userName" runat="server" style="font-weight:bold;">(brukernavn)</span>), har <span id="licCounter" runat="server" style="color:#ff0000; font-weight:bold;">xx</span> lisenser som utgår de nærmeste <span id="expMonths" runat="server" style="font-weight:normal;">(tid)</span> månedene.</span>
+            <input type="checkbox" id="expandCB"/><label id="eLabel" for="expandCB">&nbsp;&nbsp;</label>&nbsp;&nbsp;
+            <ul>
+                <asp:DataList ID="dataListNotifications" DataKeyField="nID" DataSourceID="SqlDataSource1" runat="server" OnSelectedIndexChanged="dataListNotifications_SelectedIndexChanged">
+                    <ItemTemplate>
+                        <asp:Label ID="dNotificationTimeLabel" runat="server" Text='<%# Eval("dNotificationTime") %>' />
+                        <asp:Label ID="nIDLabel" runat="server" Text='<%# Eval("nID") %>' />
+                        <asp:Label ID="lIDLabel" runat="server" Text='<%# Eval("lID") %>' />
+                    </ItemTemplate>
+                </asp:DataList>
+		        <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:LicenceWebConnectionString %>" SelectCommand="SELECT [dNotificationTime], [nID], [lID] FROM [Notifications]"></asp:SqlDataSource>
+                <asp:ObjectDataSource ID="dsNotifications" runat="server"></asp:ObjectDataSource>
+            </ul>
+	    </li>
+    </ul>
 
-
+    <!--------------------------------------------------------------------->
+    <!-- The main GridView to hold license data                          -->
+    <!--------------------------------------------------------------------->
     <div class="row">
         <h4 style="background-color:lightgreen; text-align: center; padding-top:5px; padding-bottom:5px;">Mine lisenser</h4>
         <p>
@@ -89,6 +95,4 @@
             <asp:LinkButton ID="lnkbExportToExcel" runat="server" OnClick="lnkbExportToExcel_Click">Export to Excel</asp:LinkButton>
         </p>
     </div>
-
-    </ul>
-    </a></asp:Content>
+</asp:Content>

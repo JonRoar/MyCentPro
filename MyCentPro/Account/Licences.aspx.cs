@@ -30,6 +30,14 @@ namespace MyCentPro
             {
                 BindData();
             }
+
+            //do not display red slide-down
+            errUl.Visible = false;
+
+            //update dynamic text on page for warnings and stuff...
+            licCounter.InnerText = "4";
+            userName.InnerText = User.Identity.Name;
+            expMonths.InnerText = "3"; // [HARDCODED]
         }
 
         public SqlConnection OpenDBConnection()
@@ -53,6 +61,7 @@ namespace MyCentPro
         {
             try
             {
+                //instantiate connection
                 SqlConnection con = OpenDBConnection();
                 /*cmd.CommandText = "SELECT l.lID AS 'lID', u.uName AS 'Eier', a.aAgreementName AS 'Avtale', l.lDateFrom AS 'Gyldig fra', " +
                                     "l.lDateTo AS 'Gyldig til', l.lCount AS 'Antall lisenser', n.nDescription AS 'Varsel', p.pName as 'Produsent', " +
@@ -66,6 +75,7 @@ namespace MyCentPro
                                     "LEFT JOIN Contacts c ON lic.cID = c.cID " +
                                     "WHERE u.Uname = '" + Application["aspID"] + "'";*/
 
+                //define query
                 cmd.CommandText =   "SELECT l.owner_uID, u.aspID, p.Name as 'Produsent', t.TypeName as 'Lisenstype', l.Qty as 'Antall', " +
                                     "l.DateFrom as 'Gyldig fra', l.DateTo as 'Gyldig til', u.Name as 'Eier', a.aID as 'AvtaleID', a.AgreementName as 'Avtale', c.cID, c.Name as 'Kontaktperson' " +
                                     "FROM Licenses l " +
@@ -78,6 +88,7 @@ namespace MyCentPro
                                     /*WHERE u.aspID = 'f84e76b3-aada-4a50-96c0-79a092173491'*/ /* Thomas Rofstad */
                 cmd.Connection = con;
 
+                //get license data
                 da = new SqlDataAdapter(cmd);
                 da.Fill(ds);
                 con.Open();
@@ -86,12 +97,29 @@ namespace MyCentPro
 
                 licenceGridView.DataSource = ds;
                 licenceGridView.DataBind();
+                //close and cleanup
+                con.Close();
 
+                //define query
+                cmd.CommandText = "SELECT nID, dNotificationTime AS 'Varsel', " +
+                                    "(SELECT DATEDIFF(DAY, GETDATE(), CONVERT(DATE,((SELECT n.dNotificationTime FROM Notifications n WHERE n.nID=1))))) AS 'Dager til utløp' " +
+                                    "FROM Notifications WHERE nID = 1";
+                cmd.Connection = con;
+
+                //get license notifications
+                da.Fill(ds);
+                con.Open();
+                cmd.ExecuteNonQuery();
+                Session["NotificationTable"] = ds;
+                //close and cleanup
                 con.Close();
             }
-            catch (SqlException)
+            catch (SqlException sqlex)
             {
-                
+                //debug SQL error message. Should be removed before release. -jr
+                FailureText.Text = sqlex.Message;
+                ErrorMessage.Visible = true;
+
             }
             finally
             {
@@ -107,6 +135,9 @@ namespace MyCentPro
 
         protected void ExportToExcel2003(object sender, EventArgs e)
         {
+            LogWriter lw = new LogWriter();
+            lw.WriteToLog(userInfo, "Dette er en logentry rett fra kode.");
+
             Response.Clear();
             Response.Buffer = true;
             Response.AddHeader("content-disposition", "attachment;filename=LicenceWebExport.xls");
@@ -274,6 +305,11 @@ namespace MyCentPro
         protected void lnkbExportToExcel_Click(object sender, EventArgs e)
         {
             ExportToExcel2003(sender, e);
+        }
+
+        protected void dataListNotifications_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

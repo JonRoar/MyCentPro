@@ -40,9 +40,23 @@
 
                 <HeaderStyle CssClass="GridHeader"></HeaderStyle>
                 <Columns>
-                <asp:BoundField DataField="aID" HeaderText="aID" />
+                <asp:BoundField DataField="Avtalenummer" HeaderText="Avtalenr" />
+                <asp:BoundField DataField="Produsent" HeaderText="Produsent" />
                 <asp:BoundField DataField="Avtale" HeaderText="Avtale" />
-                <asp:BoundField DataField="Avtaleeier" HeaderText="Avtaleeier" />
+                <asp:BoundField DataField="Kjøpt dato" HeaderText="Kjøpt dato" />
+                <asp:BoundField DataField="Utløpsdato" HeaderText="Utløpsdato" />
+                <asp:BoundField DataField="Varsel" HeaderText="Varsel" />
+                <asp:HyperLinkField 
+                    HeaderText="Varsel"
+                    DataNavigateUrlFields="nID" 
+                    DataTextField="Varsel"
+                    DataNavigateUrlFormatString="/Accounts/Notifications.aspx?id={0}" />
+                <asp:BoundField DataField="Eier" HeaderText="Eier" />
+                <asp:HyperLinkField 
+                    HeaderText="Kontaktperson"
+                    DataNavigateUrlFields="cID" 
+                    DataTextField="Kontaktperson"
+                    DataNavigateUrlFormatString="/Accounts/Contacts.aspx?id={0}" />  
                 <asp:CommandField ShowEditButton="true" />
                 </Columns>
             </asp:GridView>
