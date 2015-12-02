@@ -8,6 +8,8 @@ using MyCentPro;
 public partial class Account_Login : Page
 {
 
+    LogWriter logWriter = new LogWriter();
+
     //global::MyCentPro.UserInfo userInfo;
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -22,7 +24,6 @@ public partial class Account_Login : Page
 
 protected void LogIn(object sender, EventArgs e)
 {
-
     if (IsValid)
     {
         var manager = new UserManager();
@@ -38,9 +39,13 @@ protected void LogIn(object sender, EventArgs e)
                 u.Phone = user.PhoneNumber;
                 Application["aspID"] = user.Id;
 
+                //log it
+                logWriter.OpenDBConnection();
+                logWriter.WriteToLog(user.Id, "Successfull login.");
+
+                //return
                 IdentityHelper.RedirectToReturnUrl(Request.QueryString["ReturnUrl"], Response);
             }
-
         }
         else
         {
@@ -48,6 +53,11 @@ protected void LogIn(object sender, EventArgs e)
             //this.Page.ClientScript.RegisterStartupScript(this.GetType(), "ex", "alert('Feil brukernavn eller passord.');", true);
             FailureText.Text = "Ugyldig brukernavn eller passord.";
             ErrorMessage.Visible = true;
+
+            //log it
+            string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
+            logWriter.OpenDBConnection();
+            logWriter.WriteToLog(aspID, "Failed login for user '" + UserName.Text.ToString() + "'");
         }
     }
 }
