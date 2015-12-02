@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Data;
+using Microsoft.AspNet.Identity;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Web.UI;
@@ -11,7 +12,7 @@ using System.Web.UI.WebControls.WebParts;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using System.Drawing;
-//using OpenXmlPackaging;
+
 
 namespace MyCentPro
 {
@@ -20,15 +21,71 @@ namespace MyCentPro
         SqlDataAdapter da;
         DataSet ds = new DataSet();
         SqlCommand cmd = new SqlCommand();
-        SqlConnection con;
-        protected global::MyCentPro.UserInfo userInfo;
-        //protected global::System.Web.UI.WebControls.GridView licenceGridView;
+        LogWriter logWriter = new LogWriter();
+        int action = -1;
+        int id = -1;
+
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if ((System.Web.HttpContext.Current.User != null) && System.Web.HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
+                logWriter.OpenDBConnection();
+                logWriter.WriteToLog(aspID, "User accessed the Licences.aspx page.");
+            }
+
             if (!Page.IsPostBack)
             {
-                BindData();
+                if (Request.QueryString.Count >= 1)
+                {
+                    action = Int32.Parse(Request.QueryString["action"]);
+                    id = Int32.Parse(Request.QueryString["eId"]);
+
+                    // Action list:
+                    // 0 = reserved
+                    // 1 = edit
+                    // 2 = delete
+                    string sAction;
+                    switch (action)
+                    {
+                        case 1:
+                            sAction = "rediger";
+                            //remove stuff we don't want now...
+                            licenceGridView.Visible = false;
+                            licenseHeading.Visible = false;
+                            jumbotron.Visible = false;
+                            eUl.Visible = false;
+
+                            //show the stuff we want
+                            addOrEdit.Visible = true;
+                            eIdLabel.Text = "action: " + sAction + ", eID: " + id;
+                            eIdLabel.Visible = true;
+                            break;
+                        case 2:
+                            sAction = "slett";
+                            //remove stuff we don't want now...
+                            licenceGridView.Visible = false;
+                            licenseHeading.Visible = false;
+                            jumbotron.Visible = false;
+                            eUl.Visible = false;
+
+                            //show the stuff we want
+                            addOrEdit.Visible = true;
+                            eIdLabel.Text = "action: " + sAction + ", eID: " + id;
+                            eIdLabel.Visible = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    addOrEdit.Visible = false;
+                    //eIdLabel.Text = "action: " + action + ", eID: " + id;
+                    eIdLabel.Visible = false;
+                    BindData();
+                }
             }
 
             //do not display red slide-down
@@ -42,9 +99,10 @@ namespace MyCentPro
 
         public SqlConnection OpenDBConnection()
         {
+            SqlConnection con = null;
             try
             {
-                con = new SqlConnection(ConfigurationManager.ConnectionStrings["CentProSQL"].ConnectionString);
+                con = new SqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString);
                 return con;
             }
             catch (SqlException)
@@ -59,21 +117,12 @@ namespace MyCentPro
 
         public void BindData()
         {
+            SqlConnection con = null;
             try
             {
                 //instantiate connection
-                SqlConnection con = OpenDBConnection();
-                /*cmd.CommandText = "SELECT l.lID AS 'lID', u.uName AS 'Eier', a.aAgreementName AS 'Avtale', l.lDateFrom AS 'Gyldig fra', " +
-                                    "l.lDateTo AS 'Gyldig til', l.lCount AS 'Antall lisenser', n.nDescription AS 'Varsel', p.pName as 'Produsent', " +
-                                    "c.cName AS 'Kontaktperson' " +
-
-                                    "FROM Licences l, Users u, Agreements a " +
-
-                                    "LEFT JOIN Licences lic ON lic.aID = a.aID " +
-                                    "LEFT JOIN Notifications n ON lic.nID = n.nID " +
-                                    "LEFT JOIN Producer p ON lic.pID = p.pID " +
-                                    "LEFT JOIN Contacts c ON lic.cID = c.cID " +
-                                    "WHERE u.Uname = '" + Application["aspID"] + "'";*/
+                con = OpenDBConnection();
+                cmd = new SqlCommand();
 
                 //define query
                 cmd.CommandText =   "SELECT l.owner_uID, u.aspID, p.Name as 'Produsent', t.TypeName as 'Lisenstype', l.Qty as 'Antall', " +
@@ -101,6 +150,7 @@ namespace MyCentPro
                 con.Close();
 
                 //define query
+                /*
                 cmd.CommandText = "SELECT nID, dNotificationTime AS 'Varsel', " +
                                     "(SELECT DATEDIFF(DAY, GETDATE(), CONVERT(DATE,((SELECT n.dNotificationTime FROM Notifications n WHERE n.nID=1))))) AS 'Dager til utløp' " +
                                     "FROM Notifications WHERE nID = 1";
@@ -113,12 +163,13 @@ namespace MyCentPro
                 Session["NotificationTable"] = ds;
                 //close and cleanup
                 con.Close();
+                */
             }
-            catch (SqlException sqlex)
+            catch (SqlException )
             {
                 //debug SQL error message. Should be removed before release. -jr
-                FailureText.Text = sqlex.Message;
-                ErrorMessage.Visible = true;
+                //FailureText.Text = sqlex.Message;
+                //ErrorMessage.Visible = true;
 
             }
             finally
@@ -127,7 +178,6 @@ namespace MyCentPro
             }
         }
 
-
         protected void ExportToExcel2007()
         {
             
@@ -135,8 +185,8 @@ namespace MyCentPro
 
         protected void ExportToExcel2003(object sender, EventArgs e)
         {
-            LogWriter lw = new LogWriter();
-            lw.WriteToLog(userInfo, "Dette er en logentry rett fra kode.");
+            //LogWriter lw = new LogWriter();
+            //lw.WriteToLog(userInfo, "Dette er en logentry rett fra kode.");
 
             Response.Clear();
             Response.Buffer = true;
@@ -194,6 +244,11 @@ namespace MyCentPro
                 Response.Output.Write(sw.ToString());
                 Response.Flush();
                 Response.End();
+
+                //log it
+                string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
+                logWriter.OpenDBConnection();
+                logWriter.WriteToLog(aspID, "User exported licenses to Excel.");
             }
         }
 
@@ -219,23 +274,42 @@ namespace MyCentPro
 
         protected void licenceGridView_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-            ClientScript.RegisterStartupScript(GetType(), "AlertMessage", "callAlert('Hello world!');", true);
-            ScriptManager.RegisterStartupScript(this, this.GetType(), "Message", "<SCRIPT LANGUAGE='javascript'>alert('Hello world!');</script>", false);
+            //ClientScript.RegisterStartupScript(GetType(), "AlertMessage", "callAlert('Hello world!');", true);
+            //ScriptManager.RegisterStartupScript(this, this.GetType(), "Message", "<SCRIPT LANGUAGE='javascript'>alert('Hello world!');</script>", false);
 
+            Response.Redirect("Licences.aspx?action=2&eId=" + e.RowIndex, false);
+            Context.ApplicationInstance.CompleteRequest();    
+        }
+
+        protected void RowDelete(object sender, GridViewDeleteEventArgs e)
+        {
             SqlConnection conn = OpenDBConnection();
             GridViewRow row = (GridViewRow)licenceGridView.Rows[e.RowIndex];
             Label lbldeleteid = (Label)row.FindControl("lID");
+
+            SqlConnection con = OpenDBConnection();
             con.Open();
             SqlCommand cmd = new SqlCommand("delete FROM Licences where lID='" + Convert.ToInt32(licenceGridView.DataKeys[e.RowIndex].Value.ToString()) + "'", con);
             cmd.ExecuteNonQuery();
+
             con.Close();
             BindData();
+
+            //log it
+            string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
+            logWriter.OpenDBConnection();
+            logWriter.WriteToLog(aspID, "User deleted a license with lID = " + Convert.ToInt32(licenceGridView.DataKeys[e.RowIndex].Value.ToString()));
         }
 
         protected void licenceGridView_RowEditing(object sender, GridViewEditEventArgs e)
         {
-            licenceGridView.EditIndex = e.NewEditIndex;
-            BindData();
+            Response.Redirect("Licences.aspx?action=1&eId=" + e.NewEditIndex, false);
+            Context.ApplicationInstance.CompleteRequest();
+
+            //log it
+            string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
+            logWriter.OpenDBConnection();
+            logWriter.WriteToLog(aspID, "User initiated edit of license with lID = " + Convert.ToInt32(licenceGridView.DataKeys[e.NewEditIndex].Value.ToString()));
         }
 
         protected void licenceGridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
@@ -252,7 +326,7 @@ namespace MyCentPro
 
         protected void licenceGridView_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
-            SqlConnection conn = OpenDBConnection();
+            SqlConnection con = OpenDBConnection();
             GridViewRow row = licenceGridView.Rows[e.RowIndex];
 
             //Retrieve the table from the session object.
@@ -267,12 +341,12 @@ namespace MyCentPro
             //TextBox textc = (TextBox)row.FindControl("txtc");
             licenceGridView.EditIndex = -1;
 
-            conn.Open();
+            con.Open();
             //SqlCommand cmd = new SqlCommand("SELECT * FROM detail", con);
-            SqlCommand cmd = new SqlCommand("UPDATE Licences SET owner_uID=" + Int16.Parse(txtOwner.Text) + ", lCount=" + Int16.Parse(txtCount.Text) + " where lID=" + lbllID.Text, conn);
+            SqlCommand cmd = new SqlCommand("UPDATE Licences SET owner_uID=" + Int16.Parse(txtOwner.Text) + ", lCount=" + Int16.Parse(txtCount.Text) + " where lID=" + lbllID.Text, con);
             cmd.ExecuteNonQuery();
 
-            conn.Close();
+            con.Close();
             BindData();
         }
 
@@ -280,7 +354,7 @@ namespace MyCentPro
         {
             try
             {
-                SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["CentProSQL"].ConnectionString);
+                SqlConnection connection = new SqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString);
                 connection.Open();
 
                 if (connection.State == System.Data.ConnectionState.Open)
@@ -297,8 +371,8 @@ namespace MyCentPro
             }
             catch
             {
-                Response.Write("Connection string: " + ConfigurationManager.ConnectionStrings["CentProSQL"].ToString() + "\r\nCatched a try: No connection. Timed out without response...");
-                Console.Write("Connection string: " + ConfigurationManager.ConnectionStrings["CentProSQL"].ToString() + "\r\nCatched a try: No connection. Timed out without response...");
+                Response.Write("Connection string: " + ConfigurationManager.ConnectionStrings["ApplicationServices"].ToString() + "\r\nCatched a try: No connection. Timed out without response...");
+                Console.Write("Connection string: " + ConfigurationManager.ConnectionStrings["ApplicationServices"].ToString() + "\r\nCatched a try: No connection. Timed out without response...");
             }
         }
 

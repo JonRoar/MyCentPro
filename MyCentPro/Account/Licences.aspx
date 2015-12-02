@@ -2,12 +2,13 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-    <div class="jumbotron">
+    <div class="jumbotron" id="jumbotron" runat="server">
         <h1>Velkommen til MyCentPro</h1>
         <p class="lead">MyCentPro gir deg fullstendig oversikt over alle firmaets lisenser samtidig som vi sender varsler når abonnementene og avtalene er i ferd med å utløpe.</p>
         <p><a href="http://www.asp.net" class="btn btn-primary btn-lg">Les mer &raquo;</a>
         </p>
     </div>
+
     <!--------------------------------------------------------------------->
     <!-- Placeholder for error messages generated in the code            -->
     <!--------------------------------------------------------------------->
@@ -46,16 +47,20 @@
                         <asp:Label ID="lIDLabel" runat="server" Text='<%# Eval("lID") %>' />
                     </ItemTemplate>
                 </asp:DataList>
-		        <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:LicenceWebConnectionString %>" SelectCommand="SELECT [dNotificationTime], [nID], [lID] FROM [Notifications]"></asp:SqlDataSource>
+		        <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:ApplicationServices %>" SelectCommand="SELECT [dNotificationTime], [nID], [lID] FROM [Notifications]"></asp:SqlDataSource>
                 <asp:ObjectDataSource ID="dsNotifications" runat="server"></asp:ObjectDataSource>
             </ul>
 	    </li>
     </ul>
 
+    <div class="addOrEdit" id="addOrEdit" runat="server">
+        <asp:Label ID="eIdLabel" runat="server" Text="eIdLabel"></asp:Label>
+    </div>
+    
     <!--------------------------------------------------------------------->
     <!-- The main GridView to hold license data                          -->
     <!--------------------------------------------------------------------->
-    <div class="row">
+    <div class="row" runat="server" id="licenseHeading">
         <h4 style="background-color:lightgreen; text-align: center; padding-top:5px; padding-bottom:5px;">Mine lisenser</h4>
         <p>
             <asp:GridView ID="licenceGridView" runat="server" AllowPaging="true" AutoGenerateColumns="false" CellPadding="4" GridLines="None"
@@ -68,7 +73,7 @@
                 OnRowUpdating="licenceGridView_RowUpdating"
                 RowStyle-BackColor="White"
                 AlternatingRowStyle-BackColor="#a6c8e6">
-
+                
                 <Columns>
                 <asp:BoundField DataField="owner_uID" HeaderText="ID" />
                 <asp:BoundField DataField="aspID" HeaderText="aspID" />
