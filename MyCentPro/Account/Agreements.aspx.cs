@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Data;
 using System.Configuration;
+using Microsoft.AspNet.Identity;
 using System.Data.SqlClient;
 using System.Web.UI;
 using System.Web.UI.WebControls.WebParts;
@@ -20,14 +21,47 @@ namespace MyCentPro
         SqlDataAdapter da;
         DataSet ds = new DataSet();
         SqlCommand cmd = new SqlCommand();
+        LogWriter logWriter = new LogWriter();
         SqlConnection con;
         //protected global::System.Web.UI.WebControls.GridView agreementsGridView;
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if ((System.Web.HttpContext.Current.User != null) && System.Web.HttpContext.Current.User.Identity.IsAuthenticated)
+            {
+                string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
+                logWriter.OpenDBConnection();
+                logWriter.WriteToLog(aspID, "User accessed the Agreements.aspx page.");
+            }
+
             if (!Page.IsPostBack)
             {
                 BindData();
+            }
+
+            //do not display red slide-down
+            errUl.Visible = false;
+
+            //update dynamic text on page for warnings and stuff...
+            agrCounter.InnerText = "2"; // [HARDCODED]
+            userName.InnerText = User.Identity.Name;
+            expMonths.InnerText = "1"; // [HARDCODED]
+        }
+
+        public SqlConnection OpenDBConnection()
+        {
+            try
+            {
+                con = new SqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString);
+                return con;
+            }
+            catch (SqlException)
+            {
+                return null;
+            }
+            finally
+            {
+                con.Close();
             }
         }
 
@@ -35,8 +69,10 @@ namespace MyCentPro
         {
             try
             {
-                con = new SqlConnection(ConfigurationManager.ConnectionStrings["CentProSQL"].ConnectionString);
-                //cmd.CommandText = "Select * from Agreements";
+                //instantiate connection
+                con = OpenDBConnection();
+
+                //define query
                 cmd.CommandText = "SELECT a.aNumber as 'Avtalenummer', p.Name as 'Produsent', a.AgreementName as 'Avtale', a.DateFrom as 'Kjøpt dato', " +
 	                                "a.DateTo as 'Utløpsdato', n.nID, n.nDescription as 'Varsel', u.Name as 'Eier', c.cID, c.Name as 'Kontaktperson' " +
                                     "FROM Agreements a " +
@@ -91,12 +127,22 @@ namespace MyCentPro
             con.Close();
             BindData();
             */
+
+            //log it
+            string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
+            logWriter.OpenDBConnection();
+            logWriter.WriteToLog(aspID, "User deleted a license with lID = " + Convert.ToInt32(agreementsGridView.DataKeys[e.RowIndex].Value.ToString()));
         }
 
         protected void agreementsGridView_RowEditing(object sender, GridViewEditEventArgs e)
         {
             agreementsGridView.EditIndex = e.NewEditIndex;
             BindData();
+
+            //log it
+            string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
+            logWriter.OpenDBConnection();
+            logWriter.WriteToLog(aspID, "User initiated edit of agreement with aID = " + Convert.ToInt32(agreementsGridView.DataKeys[e.NewEditIndex].Value.ToString()));
         }
 
         protected void agreementsGridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
