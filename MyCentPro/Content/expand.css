@@ -15,6 +15,13 @@ ul, #eUl, #errUl { list-style-type: none; }
     float:right;
 }
 
+.addOrEdit {
+    border: 1px solid #ABC;
+	border-radius: 5px;
+    padding: 10px;
+    margin-left: 30px;
+    margin-right: 30px;
+}
 #dueLabel {
 	background-color: #F0E1A1;
     color: #ffffff;
