@@ -25,7 +25,7 @@ public class LogWriter
     {
         try
         {
-            con = new SqlConnection(ConfigurationManager.ConnectionStrings["CentProSQL"].ConnectionString);
+            con = new SqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString);
             return con;
         }
         catch (SqlException)
@@ -41,9 +41,9 @@ public class LogWriter
     /// <summary>
     /// The single instance method that writes to the log file
     /// </summary>
-    /// <param name="user">The UserInfo object of the user to attach the entry to</param>
+    /// <param name="aspUserId">The aspID string of the user to attach the entry to</param>
     /// <param name="message">The message to write to the log</param>
-    public Exception WriteToLog(UserInfo user, string message)
+    public Exception WriteToLog(string aspUserId, string message)
     {
         
         try
@@ -52,7 +52,7 @@ public class LogWriter
             SqlConnection con = OpenDBConnection();
 
             //define query
-            cmd.CommandText = "INSERT INTO Log (uID, Timestamp, logEntry) VALUES((SELECT u.uID FROM Users u WHERE u.aspID = '" + user.AspID + "'), GETDATE(), '" + message + "')";
+            cmd.CommandText = "INSERT INTO Log (uID, Timestamp, logEntry) VALUES((SELECT u.uID FROM Users u WHERE u.aspID = '" + aspUserId + "'), GETDATE(), '" + message + "')";
             cmd.Connection = con;
             //execute
             con.Open();
