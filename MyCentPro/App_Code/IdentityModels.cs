@@ -56,12 +56,23 @@ namespace MyCentPro
 
         public static void SignIn(UserManager manager, ApplicationUser user, bool isPersistent)
         {
-            IAuthenticationManager authenticationManager = HttpContext.Current.GetOwinContext().Authentication;
-            authenticationManager.SignOut(DefaultAuthenticationTypes.ExternalCookie);
+            try
+            {
+                IAuthenticationManager authenticationManager = HttpContext.Current.GetOwinContext().Authentication;
+                authenticationManager.SignOut(DefaultAuthenticationTypes.ExternalCookie);
 
-            var identity = manager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
-            //manager.IsInRole(user, "Admin"); Check if user is admin...
-            authenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = isPersistent }, identity);            
+                var identity = manager.CreateIdentity(user, DefaultAuthenticationTypes.ApplicationCookie);
+                //manager.IsInRole(user, "Admin"); Check if user is admin...
+                authenticationManager.SignIn(new AuthenticationProperties() { IsPersistent = isPersistent }, identity);
+            }
+            catch (Exception)
+            {
+
+            }
+            finally
+            {
+
+            }
         }
 
         public const string ProviderNameKey = "providerName";

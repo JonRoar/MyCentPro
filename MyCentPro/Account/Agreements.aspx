@@ -8,6 +8,10 @@
         <p><a href="http://www.asp.net" class="btn btn-primary btn-lg">Les mer &raquo;</a></p>
     </div>
 
+    <div id="dialogConfirm" title="Slette avtale?" style="display:none">
+      <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Avtalen blir slettet. Er du sikker?</p>
+    </div>
+
     <!--------------------------------------------------------------------->
     <!-- Placeholder for error messages generated in the code            -->
     <!--------------------------------------------------------------------->
@@ -36,7 +40,7 @@
     <!--------------------------------------------------------------------->
     <ul id="eUl" runat="server">
         <li id="eLi">
-            <span>Du (<span id="userName" runat="server" style="font-weight:bold;">(brukernavn)</span>), har <span id="agrCounter" runat="server" style="color:#ff0000; font-weight:bold;">xx</span> lisenser som utgår de nærmeste <span id="expMonths" runat="server" style="font-weight:normal;">(tid)</span> månedene.</span>
+            <span>Du (<span id="userName" runat="server" style="font-weight:bold;">(brukernavn)</span>), har <span id="agrCounter" runat="server" style="color:#ff0000; font-weight:bold;">xx</span> lisenser som utgår <span id="expText" runat="server">de nærmeste <span id="expMonths" runat="server" style="font-weight:normal;">(tid)</span> månedene.</span></span>
             <input type="checkbox" id="expandCB"/><label id="eLabel" for="expandCB">&nbsp;&nbsp;</label>&nbsp;&nbsp;
             <ul>
                 <asp:DataList ID="dataListNotifications" DataKeyField="nID" DataSourceID="SqlDataSource1" runat="server">
@@ -60,6 +64,7 @@
         <p>
             <asp:GridView ID="agreementsGridView" runat="server" AllowPaging="true" AutoGenerateColumns="false" CellPadding="4" GridLines="None" CssClass="Grid" 
                 Caption="" CaptionAlign="Left" Width="1200px"
+                DataKeyNames="Avtalenummer"
                 OnPageIndexChanging="agreementsGridView_PageIndexChanging"
                 OnRowCancelingEdit="agreementsGridView_RowCancelingEdit"
                 OnRowDeleting="agreementsGridView_RowDeleting"
@@ -75,21 +80,52 @@
                 <asp:BoundField DataField="Avtale" HeaderText="Avtale" />
                 <asp:BoundField DataField="Kjøpt dato" HeaderText="Kjøpt dato" />
                 <asp:BoundField DataField="Utløpsdato" HeaderText="Utløpsdato" />
-                <asp:BoundField DataField="Varsel" HeaderText="Varsel" />
+                <asp:HyperLinkField 
+                    Text="&lt;img src='../Content/images/pdficon_small.png' alt='Last ned faktura' border='0'/&gt;"
+                    HeaderText="&lt;img src='../Content/images/pdficon_small.png' alt='Last ned faktura' border='0'/&gt;"
+                    DataNavigateUrlFields="aID" 
+                    DataNavigateUrlFormatString="/Account/GetInvoice.aspx?iId={0}" />
                 <asp:HyperLinkField 
                     HeaderText="Varsel"
                     DataNavigateUrlFields="nID" 
                     DataTextField="Varsel"
-                    DataNavigateUrlFormatString="/Accounts/Notifications.aspx?id={0}" />
+                    DataNavigateUrlFormatString="/Account/Notifications.aspx?nId={0}" />
                 <asp:BoundField DataField="Eier" HeaderText="Eier" />
                 <asp:HyperLinkField 
                     HeaderText="Kontaktperson"
                     DataNavigateUrlFields="cID" 
                     DataTextField="Kontaktperson"
-                    DataNavigateUrlFormatString="/Accounts/Contacts.aspx?id={0}" />  
+                    DataNavigateUrlFormatString="/Account/Contacts.aspx?cId={0}" />  
                 <asp:CommandField ShowEditButton="true" />
+                <asp:CommandField ShowDeleteButton="true" />
                 </Columns>
             </asp:GridView>
         </p>
     </div>
+
+    <script>
+        function showDialog() {
+            $("#dialogConfirm").dialog({
+                resizable: false,
+                height: 180,
+                width: 460,
+                modal: true,
+                buttons: {
+                    "Slett": function () {
+                        $doDelete();
+                        $(this).dialog("close");
+
+                    },
+                    "Avbryt": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        }
+
+        function doDelete()
+        {
+            alert();
+        }
+    </script>
 </asp:Content>

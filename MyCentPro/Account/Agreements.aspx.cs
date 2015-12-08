@@ -31,7 +31,7 @@ namespace MyCentPro
             {
                 string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
                 logWriter.OpenDBConnection();
-                logWriter.WriteToLog(aspID, "User accessed the Agreements.aspx page.");
+                logWriter.WriteToLog(aspID, "User accessed Agreements.aspx.");
             }
 
             if (!Page.IsPostBack)
@@ -42,10 +42,15 @@ namespace MyCentPro
             //do not display red slide-down
             errUl.Visible = false;
 
+            //do not display the modal delete agreement dialog
+            //dialogConfirm.Visible = false;
+
             //update dynamic text on page for warnings and stuff...
             agrCounter.InnerText = "2"; // [HARDCODED]
             userName.InnerText = User.Identity.Name;
-            expMonths.InnerText = "1"; // [HARDCODED]
+
+            expText.InnerText = "den nærmeste måneden.";
+            expMonths.InnerText = "3"; // [HARDCODED]
         }
 
         public SqlConnection OpenDBConnection()
@@ -73,13 +78,15 @@ namespace MyCentPro
                 con = OpenDBConnection();
 
                 //define query
-                cmd.CommandText = "SELECT a.aNumber as 'Avtalenummer', p.Name as 'Produsent', a.AgreementName as 'Avtale', a.DateFrom as 'Kjøpt dato', " +
-	                                "a.DateTo as 'Utløpsdato', n.nID, n.nDescription as 'Varsel', u.Name as 'Eier', c.cID, c.Name as 'Kontaktperson' " +
+                cmd.CommandText = "SELECT a.aID, a.aNumber as 'Avtalenummer', p.Name as 'Produsent', a.AgreementName as 'Avtale', convert(varchar, a.DateFrom, 104) as 'Kjøpt dato', " +
+                                    "convert(varchar, a.DateTo, 104) as 'Utløpsdato', n.nID, n.nDescription as 'Varsel', u.Name as 'Eier', c.cID, c.Name as 'Kontaktperson', " +
+                                    "i.invoiceLocation + invoiceFilename as 'InvoicePath', convert(varchar, i.uploadedTimestamp, 104) as 'InvoiceUploaded' " +
                                     "FROM Agreements a " +
                                     "JOIN Users u ON a.uID_AgreementOwner = u.uID " +
                                     "JOIN Producer p ON a.pID = p.pID " +
                                     "JOIN Notifications n ON a.nID = n.nID " +
-                                    "JOIN Contacts c ON a.cID = c.cID";
+                                    "JOIN Contacts c ON a.cID = c.cID " +
+                                    "JOIN Invoices i ON a.aID = i.parentID";
                 cmd.Connection = con;
 
                 da = new SqlDataAdapter(cmd);
@@ -128,10 +135,14 @@ namespace MyCentPro
             BindData();
             */
 
+            //Show jQuery dialog asking for confirmation from the user to delete agreement
+            //dialogConfirm.Visible = true;
+            ClientScript.RegisterStartupScript(GetType(), "Javascript", "javascript:showDialog();", true);
+
             //log it
             string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
             logWriter.OpenDBConnection();
-            logWriter.WriteToLog(aspID, "User deleted a license with lID = " + Convert.ToInt32(agreementsGridView.DataKeys[e.RowIndex].Value.ToString()));
+            logWriter.WriteToLog(aspID, "User deleted a license with lID = " + agreementsGridView.DataKeys[e.RowIndex].Value.ToString());
         }
 
         protected void agreementsGridView_RowEditing(object sender, GridViewEditEventArgs e)
@@ -142,7 +153,7 @@ namespace MyCentPro
             //log it
             string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
             logWriter.OpenDBConnection();
-            logWriter.WriteToLog(aspID, "User initiated edit of agreement with aID = " + Convert.ToInt32(agreementsGridView.DataKeys[e.NewEditIndex].Value.ToString()));
+            logWriter.WriteToLog(aspID, "User initiated edit of agreement with aID = " + agreementsGridView.DataKeys[e.NewEditIndex].Value.ToString());
         }
 
         protected void agreementsGridView_PageIndexChanging(object sender, GridViewPageEventArgs e)

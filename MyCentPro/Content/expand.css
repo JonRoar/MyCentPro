@@ -15,6 +15,17 @@ ul, #eUl, #errUl { list-style-type: none; }
     float:right;
 }
 
+.ui-widget-overlay
+{
+  opacity: .60 !important; /* Make sure to change both of these, as IE only sees the second one */
+  filter: Alpha(Opacity=60) !important;
+  background: rgb(60, 60, 60) !important; /* This will make it darker */
+}
+
+div.jQuery {
+
+}
+
 .addOrEdit {
     border: 1px solid #ABC;
 	border-radius: 5px;
@@ -22,6 +33,15 @@ ul, #eUl, #errUl { list-style-type: none; }
     margin-left: 30px;
     margin-right: 30px;
 }
+
+#passwordForm {
+    border: 1px solid #ABC;
+	border-radius: 5px;
+    padding: 10px;
+    margin-left: 0px;
+    margin-right: 30px;
+}
+
 #dueLabel {
 	background-color: #F0E1A1;
     color: #ffffff;

@@ -32,7 +32,7 @@ namespace MyCentPro
             {
                 string aspID = HttpContext.Current.User.Identity.GetUserId().ToString();
                 logWriter.OpenDBConnection();
-                logWriter.WriteToLog(aspID, "User accessed the Licences.aspx page.");
+                logWriter.WriteToLog(aspID, "User accessed Licences.aspx.");
             }
 
             if (!Page.IsPostBack)

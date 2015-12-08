@@ -14,13 +14,17 @@
 
     <div class="row">
         <div class="col-md-12">
-            <section id="passwordForm">
+            <section id="passwordForm" class="passwordForm">
                 <asp:PlaceHolder runat="server" ID="setPassword" Visible="false">
                     <p>
                         You do not have a local password for this site. Add a local
                         password so you can log in without an external login.
                     </p>
                     <div class="form-horizontal">
+                        <div id="dialog-confirm" title="Empty the recycle bin?">
+                          <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>These items will be permanently deleted and cannot be recovered. Are you sure?</p>
+                        </div>
+
                         <h4>Set Password Form</h4>
                         <hr />
                         <asp:ValidationSummary runat="server" ShowModelStateErrors="true" CssClass="text-danger" />
